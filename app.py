@@ -1,4 +1,5 @@
 import sqlalchemy
+import numpy as np
 from sqlalchemy.ext.automap import automap_base
 from sqlalchemy.orm import Session
 from sqlalchemy import create_engine, func
@@ -44,11 +45,19 @@ def welcome():
 def precipitation():
     session = Session(engine)
 
-    prec_last12 = session.query(Measurement.date, Measurement.prcp).\
+    results = session.query(Measurement.date, Measurement.prcp).\
     filter(Measurement.date <= "2017-08-23").\
     filter(Measurement.date >= "2016-08-23").all()
 
-    precipitate = list(np.ravel(prec_last12))
+    session.close()
+
+    precipitate = []
+    for date, prcp in results:
+        prec_dict = {}
+        prec_dict["name"] = date
+        prec_dict["prcp"] = prcp
+        precipitate.append(prec_dict)
+        
     return jsonify(precipitate)
 
 
